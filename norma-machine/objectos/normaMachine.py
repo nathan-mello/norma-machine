@@ -1,60 +1,4 @@
-class Registador():
-    def __init__(self, name):
-        ''' 1 = negativo   0 = positivo'''
-        self._valor = [0, 0]
-        self._name = name
-
-    def getName(self):
-        return self._name
-
-    def getValor(self):
-        if self._valor[0] == 1:
-            return self._valor*-1
-        else:
-            return self._valor
-
-    def eZero(self):
-        if self._valor[1] == 0:
-            return True
-        return False
-
-    def ePositivo(self):
-        if self._valor[0] == 0:
-            return True
-        return False
-
-    def encrementa(self):
-        '''if self.eZero() and self.ePositivo():
-            self._encrementa()'''
-
-        if self.eZero() and not self.ePositivo():
-            self._encrementa()
-            self._valor[0] = 0
-        elif not self.ePositivo():
-            self._decrementa()
-        else:
-            self._encrementa()
-
-    def decrementa(self):
-
-        if self.eZero() and self.ePositivo():
-            self._encrementa()
-            self._valor[0] = 1
-        elif self.ePositivo():
-            self._decrementa()
-        else:
-            self._encrementa()
-
-    def _encrementa(self):
-        self._valor[1] += 1
-        self.toString()
-
-    def _decrementa(self):
-        self._valor[1] -= 1
-        self.toString()
-
-    def toString(self):
-        print("     " + self._name + ":  [ {} , {} ]".format(self._valor[0], self._valor[1]))
+from .registador import Registador
 
 class NormaMachine:
     def __init__(self):
@@ -73,14 +17,127 @@ class NormaMachine:
                 reg.encrementa()
         return reg
 
-    def adicao(self, regsitador1, registador2):
-        pass
+    def adicao(self, registador1, registador2):
 
-    def sub(self, regitador1, registador2):
-        pass
+        print("adicionando {}[{}] ao {}[{}]:"
+              .format(registador1.getName(),
+                      registador1.getValor(),
+                      registador2.getName(),
+                      registador2.getValor()))
 
-    def div(self, registador1, registador2):
-        pass
+        if registador1.ePositivo() and registador2.ePositivo():
+            while registador2.getValor() != 0:
+                registador1.encrementa()
+                registador2.decrementa()
+            return registador1
 
-    def multi(self, restador1, registador2):
-        pass
+        elif not registador1.ePositivo() and not registador2.ePositivo():
+            while registador2.getValor() != 0:
+                registador1.decrementa()
+                registador2.encrementa()
+            return registador1
+
+        else:
+            if registador1.getValorAbsoluto() < registador2.getValorAbsoluto() and registador1.ePositivo():
+                while registador1.getValor() != 0:
+                    registador2.encrementa()
+                    registador1.decrementa()
+                return registador2
+            elif registador1.getValorAbsoluto() < registador2.getValorAbsoluto() and not registador1.ePositivo():
+                while registador1.getValor() != 0:
+                    registador2.decrementa()
+                    registador1.encrementa()
+                return registador2
+            elif registador1.getValorAbsoluto() > registador2.getValorAbsoluto() and registador1.ePositivo():
+                while registador2.getValor() != 0:
+                    registador2.encrementa()
+                    registador1.decrementa()
+                return registador1
+            elif registador1.getValorAbsoluto() > registador2.getValorAbsoluto() and not registador1.ePositivo():
+                while registador2.getValor() != 0:
+                    registador2.decrementa()
+                    registador1.encrementa()
+                return registador1
+            else:
+                if registador1.ePositivo():
+                    while registador1.getValor() != 0:
+                        registador1.decrementa()
+                        registador2.encrementa()
+                    return registador1
+                else:
+                    while registador1.getValor() != 0:
+                        registador1.encrementa()
+                        registador2.decrementa()
+                    return registador1
+
+    def adicaoC(self, registadorA, registadorB, registadorC):
+
+        while registadorB.getValor() != 0:
+            registadorA.encrementa()
+            registadorC.encrementa()
+            registadorB.decrementa()
+
+        while registadorC.getValor() != 0:
+            registadorB.encrementa()
+            registadorC.decrementa()
+
+    def sub(self, registador1, registador2):
+        print("subtraindo {}[{}] ao {}[{}]:"
+              .format(registador1.getName(),
+                      registador1.getValor(),
+                      registador2.getName(),
+                      registador2.getValor()))
+
+        if not registador1.ePositivo() and not registador2.ePositivo():
+            while registador2.getValor() != 0:
+                registador1.decrementa()
+                registador2.encrementa()
+            return registador1
+
+        elif registador1.ePositivo() and registador2.ePositivo():
+            while registador2.getValor() != 0:
+                registador1.decrementa()
+                registador2.decrementa()
+            return registador1
+
+        else:
+            if registador1.getValor() > registador2.getValor():
+                while registador2.getValor() != 0:
+                    registador1.decrementa()
+                    registador2.encrementa()
+                return registador1
+            else:
+                while registador2.getValor() != 0:
+                    registador1.decrementa()
+                    registador2.decrementa()
+                return registador1
+
+    def multi(self, registadorA, registadorB):
+        sinal = 0
+        if registadorA._valor[0] != registadorB._valor[0]:
+            sinal = 1
+
+        registadorA._valor[0] = 0
+        registadorB._valor[0] = 0
+
+        registadorC = Registador("Reg_AuxiliarC")
+        registadorD = Registador("Reg_AuxiliarD")
+
+
+        print("multiplicando {}[{}] ao {}[{}]:"
+              .format(registadorA.getName(),
+                      registadorA.getValor(),
+                      registadorB.getName(),
+                      registadorB.getValor()))
+
+        while(registadorA.getValor() != 0):
+            registadorC.encrementa()
+            registadorA.decrementa()
+
+        while(registadorC.getValor() != 0):
+            self.adicaoC(registadorA, registadorB, registadorD)
+            registadorC.decrementa()
+
+        registadorA._valor[0] = sinal
+        return registadorA
+
