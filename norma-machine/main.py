@@ -1,7 +1,6 @@
 from objectos import normaMachine
 from enum import Enum, auto
 
-
 class no:
     def __init__(self, dexema, tipo):
         self.conteudo = dexema
@@ -129,7 +128,17 @@ def readLista(lista):
                 erro = []
                 return erro
 
+print(" Intrução: \n" +
+      " - código executado da versão Python 3.9.4\n" +
+      " - As operações são feitas de dois em dois\n"  +
+      " - Preferencialmente coloque as operações de multiplicação primeiro\n" +
+      " - Coloque os valores negativo entre colchete [-4]\n" +
+      " - Exemplo de entradas validas: \n" +
+      "               10-[-4]       [-10]-4       [-10]-[-4]    5*8-9      10-4       10+59        4-[-10]\n" +
+      " - Exemplo de entradas NÃO validas:\n"
+      "               ][-9+5          htosn                *-989--        [-5-9]+234")
 
+print(input("\nPressione [ENTRER]"))
 norma = normaMachine.NormaMachine()
 entrada = input("Digite a operação: ")
 lista = inicializaRegistador(token(entrada))
@@ -139,5 +148,5 @@ while len(lista) > 1:
     lista = readLista(lista)
 
 if len(lista) != 0:
-    print(lista[0].getToString())
-    print(lista[0].getValor())
+    print("\nRegistador: " +  lista[0].getToString())
+    print("Resultado: {}".format( lista[0].getValor()))

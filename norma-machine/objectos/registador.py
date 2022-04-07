@@ -1,6 +1,6 @@
 class Registador():
     def __init__(self, name):
-        ''' 1 = negativo   0 = positivo'''
+        #1 = negativo   0 = positivo
         self._valor = [0, 0]
         self._name = name
 
