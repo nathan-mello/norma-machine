@@ -1,9 +1,14 @@
-from objectos import normaMachine
+from .objectos import normaMachine
 from enum import Enum, auto
+from flask import Flask, render_template, request
+
+
+norma = normaMachine.NormaMachine()
+app = Flask(__name__)
 
 class no:
-    def __init__(self, dexema, tipo):
-        self.conteudo = dexema
+    def __init__(self, lexema, tipo):
+        self.conteudo = lexema
         self.tipo = tipo
 
     def getTipo(self):
@@ -40,7 +45,7 @@ def token(expresao):
                 int(i)
                 lista.append(no(i, Tipos.NUMERO))
             except(ValueError):
-                print("valor não identificado: " + i)
+                norma.conteudo.append("valor não identificado: " + i)
                 lista.append(no(i, Tipos.ERRO))
 
     dir = 0
@@ -71,7 +76,7 @@ def token(expresao):
                 try:
                     int(cont)
                     retorno.append(no(cont, Tipos.NUMERO))
-                except(ValueError):
+                except ValueError:
                     retorno.append(no(cont, Tipos.OPERACAO))
         elif lista[dir].getTipo() == Tipos.ERRO:
             retorno.append(lista[dir])
@@ -93,8 +98,12 @@ def readLista(lista):
 
         if type(lista[index]) is no:
 
-            if (lista[index].getTipo() == Tipos.OPERACAO
-                    and type(lista[index - 1]) is normaMachine.Registador
+            if lista[index].getTipo() == Tipos.ERRO:
+                norma.conteudo.append("Caracter não aceito pela maquina: {}".format(lista[index].getConteudo()))
+                return []
+
+            elif (lista[index].getTipo() == Tipos.OPERACAO and index > 0
+                    and type(lista[index - 1]) == normaMachine.Registador
                     and type(lista[index + 1]) == normaMachine.Registador):
 
                 operando1 = lista[index - 1]
@@ -122,31 +131,47 @@ def readLista(lista):
                     lista[index - 1] = result
                     return lista
 
-
-            elif lista[index].getTipo() == Tipos.ERRO:
-                print("Caracter não aceito pela maquina: {}".format(lista[index].getConteudo()))
-                erro = []
-                return erro
-
-print(" Intrução: \n" +
-      " - código executado da versão Python 3.9.4\n" +
-      " - As operações são feitas de dois em dois\n"  +
-      " - Preferencialmente coloque as operações de multiplicação primeiro\n" +
-      " - Coloque os valores negativo entre colchete [-4]\n" +
-      " - Exemplo de entradas validas: \n" +
-      "               10-[-4]       [-10]-4       [-10]-[-4]    5*8-9      10-4       10+59        4-[-10]\n" +
-      " - Exemplo de entradas NÃO validas:\n"
-      "               ][-9+5          htosn                *-989--        [-5-9]+234")
-
-print(input("\nPressione [ENTRER]"))
-norma = normaMachine.NormaMachine()
-entrada = input("Digite a operação: ")
-lista = inicializaRegistador(token(entrada))
+            elif lista[index].getTipo() == Tipos.OPERACAO and index == 0:
+                norma.conteudo.append("Operação invalida. Erro de sinal")
+                return []
+            elif lista[index].getTipo() == Tipos.OPERACAO:
+                norma.conteudo.append("Operação invalida.")
+                return []
 
 
-while len(lista) > 1:
-    lista = readLista(lista)
+@app.route('/', methods=['GET'])
+def main():
+    return render_template('main.html')
 
-if len(lista) != 0:
-    print("\nRegistador: " +  lista[0].getToString())
-    print("Resultado: {}".format( lista[0].getValor()))
+
+@app.route('/', methods=['POST'])
+def result():
+    norma.conteudo = []
+    retorno = '<div class=" px-4 py-5 my-5 text-center">' \
+              + '<div class="container-fluid">'
+
+    exp = request.form['expresao']
+
+    lista = inicializaRegistador(token(exp))
+    while len(lista) > 1:
+        lista = readLista(lista)
+
+    back = ''
+    if len(lista) != 0:
+        for i in norma.conteudo:
+            back += i + "\n"
+        back += "Registador: " + lista[0].toString() + "\n"
+        back += "Registador: " + str(lista[0].getValor())
+    else:
+        for i in norma.conteudo:
+            back += i + "\n"
+
+    retorno += '<textarea class="textarea" rows="20" cols="60" disabled>' \
+               + back + '</textarea> ' + '</div>' + '</div>'
+
+    return render_template('main.html', rpt=retorno)
+
+
+@app.route('/sobre')
+def about():
+    return render_template('about.html')

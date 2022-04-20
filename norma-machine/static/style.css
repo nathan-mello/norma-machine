@@ -1,0 +1,23 @@
+.textarea{
+    max-height: 40em;
+    min-height: 16em;
+    font-size: 1.0rem;
+
+    background-color: #fff;
+    border-color: #dbdbdb;
+    border-radius: 0.375em;
+    color: #363636;
+
+
+
+    font-family: system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Noto Sans",
+    "Liberation Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+    }
+
+.textarea:hover {
+    border-color: #b5b5b5;
+}
+

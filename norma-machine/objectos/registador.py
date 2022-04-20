@@ -30,6 +30,7 @@ class Registador():
     def encrementa(self):
 
         if self.eZero() and not self.ePositivo():
+
             self._encrementa()
             self._valor[0] = 0
         elif not self.ePositivo():
@@ -40,8 +41,8 @@ class Registador():
     def decrementa(self):
 
         if self.eZero() and self.ePositivo():
-            self._encrementa()
             self._valor[0] = 1
+            self._encrementa()
         elif self.ePositivo():
             self._decrementa()
         else:
@@ -49,15 +50,10 @@ class Registador():
 
     def _encrementa(self):
         self._valor[1] += 1
-        self.toString()
 
     def _decrementa(self):
         self._valor[1] -= 1
-        self.toString()
 
     def toString(self):
-        print("     " + self._name + ":  [ {} , {} ]".format(self._valor[0], self._valor[1]))
-
-    def getToString(self):
-        return self._name + " [ {} , {} ]".format(self._valor[0], self._valor[1])
+        return "     " + self._name + ":  [ {} , {} ]".format(self._valor[0], self._valor[1])
 
