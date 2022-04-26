@@ -1,142 +1,80 @@
 from .objectos import normaMachine
-from enum import Enum, auto
 from flask import Flask, render_template, request
-
+from Token import *
 
 norma = normaMachine.NormaMachine()
 app = Flask(__name__)
 
-class no:
-    def __init__(self, lexema, tipo):
-        self.conteudo = lexema
-        self.tipo = tipo
-
-    def getTipo(self):
-        return self.tipo
-
-    def getConteudo(self):
-        return self.conteudo
-
-    def toString(self):
-        return "({}, {})".format(self.conteudo, self.tipo)
-
-
-class Tipos(Enum):
-    OPERACAO = "-", "+", "*"
-    NUMERO = auto()
-    AUXILIARES = "[", "]"
-    ERRO = auto()
-
-
-def token(expresao):
-    retorno = []
-    lista = []
-    for i in expresao:
-        if i in Tipos.OPERACAO.value:
-            noChar = no(i, Tipos.OPERACAO)
-            lista.append(noChar)
-
-        elif i in Tipos.AUXILIARES.value:
-            noChar = no(i, Tipos.AUXILIARES)
-            lista.append(noChar)
-
-        else:
-            try:
-                int(i)
-                lista.append(no(i, Tipos.NUMERO))
-            except(ValueError):
-                norma.conteudo.append("valor não identificado: " + i)
-                lista.append(no(i, Tipos.ERRO))
-
-    dir = 0
-    while len(lista) != 0:
-        if lista[dir].getTipo() == Tipos.NUMERO:
-            cont = ''
-            for i in lista[dir:]:
-                if i.getTipo() == Tipos.NUMERO:
-                    cont += i.getConteudo()
-                    lista.remove(i)
-                else:
-                    break
-            retorno.append(no(cont, Tipos.NUMERO))
-        elif lista[dir].getTipo() == Tipos.OPERACAO:
-            retorno.append(lista[dir])
-            lista.remove(lista[dir])
-        elif lista[dir].getTipo() == Tipos.AUXILIARES:
-            lista.remove(lista[dir])
-            cont = ''
-            for i in lista[dir:]:
-                if i.getTipo() != Tipos.AUXILIARES:
-                    cont += i.getConteudo()
-                    lista.remove(i)
-                else:
-                    lista.remove(i)
-                    break
-            if cont != "":
-                try:
-                    int(cont)
-                    retorno.append(no(cont, Tipos.NUMERO))
-                except ValueError:
-                    retorno.append(no(cont, Tipos.OPERACAO))
-        elif lista[dir].getTipo() == Tipos.ERRO:
-            retorno.append(lista[dir])
-            lista.remove(lista[dir])
-
-    return retorno
-
 
 def inicializaRegistador(lista):
     for index in range(len(lista)):
-        if lista[index].getTipo() == Tipos.NUMERO:
-            lista[index] = norma.inicializarRegistadores(int(lista[index].getConteudo()))
+        item = lista[index]
+        if item.getTipo() == Tipos.NUMERO:
+            lista[index] = norma.inicializarRegistadores(int(item.getConteudo()))
 
     return lista
 
 
-def readLista(lista):
-    for index in range(len(lista)):
+def readList(lista):
+    lista.reverse()
+    registadores = None
 
-        if type(lista[index]) is no:
+    while len(lista) > 0:
 
-            if lista[index].getTipo() == Tipos.ERRO:
-                norma.conteudo.append("Caracter não aceito pela maquina: {}".format(lista[index].getConteudo()))
-                return []
+        item = lista.pop()
 
-            elif (lista[index].getTipo() == Tipos.OPERACAO and index > 0
-                    and type(lista[index - 1]) == normaMachine.Registador
-                    and type(lista[index + 1]) == normaMachine.Registador):
+        if type(item) is no:
 
-                operando1 = lista[index - 1]
-                operando2 = lista[index + 1]
-
-                if lista[index].getConteudo() == "-":
-                    result = norma.sub(operando1, operando2)
-                    lista.remove(lista[index])
-                    lista.remove(lista[index - 1])
-                    lista[index - 1] = result
-                    return lista
+            try:
+                if item.getTipo() == Tipos.ERRO:
+                    norma.conteudo.append("Caracter não aceito pela maquina: {}".format(item.getConteudo()))
+                    return []
 
 
-                elif lista[index].getConteudo() == "+":
-                    result = norma.adicao(operando1, operando2)
-                    lista.remove(lista[index])
-                    lista.remove(lista[index - 1])
-                    lista[index - 1] = result
-                    return lista
+                elif item.getTipo() == Tipos.OPERACAO and type(lista[-1]) == normaMachine.Registador\
+                        and registadores is not None:
 
-                elif lista[index].getConteudo() == "*":
-                    result = norma.multi(operando1, operando2)
-                    lista.remove(lista[index])
-                    lista.remove(lista[index - 1])
-                    lista[index - 1] = result
-                    return lista
+                    operador1 = registadores
+                    operador2 = lista.pop()
 
-            elif lista[index].getTipo() == Tipos.OPERACAO and index == 0:
-                norma.conteudo.append("Operação invalida. Erro de sinal")
-                return []
-            elif lista[index].getTipo() == Tipos.OPERACAO:
+                    if item.getConteudo() == "-":
+                        result = norma.sub(operador1, operador2)
+
+                        if len(lista) != 0:
+                            lista.append(result)
+                        else:
+                            norma.conteudo.append("Registador: " + result.toString())
+                            norma.conteudo.append("Registador: " + str(result.getValor()))
+
+                    elif item.getConteudo() == "+":
+                        result = norma.adicao(operador1, operador2)
+
+                        if len(lista) != 0:
+                            lista.append(result)
+                        else:
+                            norma.conteudo.append("Registador: " + result.toString())
+                            norma.conteudo.append("Registador: " + str(result.getValor()))
+
+                    elif item.getConteudo() == "*":
+                        result = norma.multi(operador1, operador2)
+
+                        if len(lista) != 0:
+                            lista.append(result)
+                        else:
+                            norma.conteudo.append("Registador: " + result.toString())
+                            norma.conteudo.append("Registador: " + str(result.getValor()))
+
+                else:
+                    norma.conteudo.append("Operação invalida.")
+                    return []
+            except(IndexError):
                 norma.conteudo.append("Operação invalida.")
                 return []
+
+        elif type(item) == normaMachine.Registador:
+            registadores = item
+
+    return []
 
 
 @app.route('/', methods=['GET'])
@@ -153,18 +91,11 @@ def result():
     exp = request.form['expresao']
 
     lista = inicializaRegistador(token(exp))
-    while len(lista) > 1:
-        lista = readLista(lista)
+    readList(lista)
 
     back = ''
-    if len(lista) != 0:
-        for i in norma.conteudo:
-            back += i + "\n"
-        back += "Registador: " + lista[0].toString() + "\n"
-        back += "Registador: " + str(lista[0].getValor())
-    else:
-        for i in norma.conteudo:
-            back += i + "\n"
+    for i in norma.conteudo:
+        back += i + "\n"
 
     retorno += '<textarea class="textarea" rows="20" cols="60" disabled>' \
                + back + '</textarea> ' + '</div>' + '</div>'
@@ -175,3 +106,4 @@ def result():
 @app.route('/sobre')
 def about():
     return render_template('about.html')
+
